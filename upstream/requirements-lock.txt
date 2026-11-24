@@ -1,0 +1,79 @@
+adjustText==1.4.0
+annotated-doc==0.0.5
+anyio==4.16.0
+backports.zstd @ file:///D:/bld/bld/rattler-build_backports.zstd_1792690552/work
+Brotli @ file:///D:/bld/brotli-split_1792653575697/work
+certifi @ file:///home/conda/feedstock_root/build_artifacts/certifi_1793720052803/work/certifi
+charset-normalizer @ file:///D:/bld/bld/rattler-build_charset-normalizer_1790766070/work
+click==8.5.0
+cloudpickle @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_cloudpickle_1765303462/work
+colorama==0.4.6
+contourpy @ file:///D:/bld/bld/rattler-build_contourpy_1769155974/work
+cycler @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_cycler_1764466758/work
+et_xmlfile @ file:///home/conda/feedstock_root/build_artifacts/et_xmlfile_1733749653422/work
+filelock==4.2.9
+fonttools @ file:///D:/bld/fonttools_1793164474129/work
+fsspec==2026.9.0
+h11==0.16.0
+h2 @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_h2_1785796355/work
+hdbscan==0.8.44
+hf-xet==1.8.0
+hpack @ file:///home/conda/feedstock_root/build_artifacts/hpack_1782283902770/work
+httpcore2==2.16.0
+httpx2==2.16.0
+huggingface_hub==2.4.0
+hyperframe @ file:///home/conda/feedstock_root/build_artifacts/hyperframe_1737618333194/work
+idna @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_idna_1790020377/work
+Jinja2==3.1.6
+joblib @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_joblib_1788177170/work
+kiwisolver @ file:///D:/bld/bld/rattler-build_kiwisolver_1790081995/work
+llvmlite==0.50.0
+lxml==6.1.3
+markdown-it-py==4.2.0
+MarkupSafe==3.0.4
+matplotlib==3.11.2
+mdurl==0.1.2
+mpmath==1.3.0
+munkres==1.1.4
+narwhals @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_narwhals_h5ded981_1793137426/work
+networkx==3.6.1
+numba==0.68.1
+numpy @ file:///D:/bld/bld/rattler-build_numpy_1779169235/work/dist/numpy-2.4.6-cp311-cp311-win_amd64.whl#sha256=1f5fa3c853dd01b13cacc0fd3cfdc827bb2f4cf73638f3949fcee463a6dc8304
+openpyxl @ file:///D:/bld/openpyxl_1788523064481/work
+packaging @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_packaging_1785888127/work
+pandas @ file:///D:/bld/bld/rattler-build_pandas_1793811651/work
+pillow @ file:///D:/bld/bld/rattler-build_pillow_1792416420/work
+plotly==7.1.0
+pyarrow @ file:///D:/bld/apache-arrow_1793667489370/work/python
+Pygments==2.21.0
+pynndescent==0.7.0
+pyparsing @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_pyparsing_1790063282/work
+PySide6==6.11.3
+PySocks @ file:///D:/bld/pysocks_1733217287171/work
+python-dateutil @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_python-dateutil_h5ded981_1793535232/work
+python-docx==1.2.0
+PyYAML==6.0.3
+regex==2026.9.29
+requests @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_requests_1778851103/work
+rich==15.0.0
+safetensors==0.8.0
+scikit-learn @ file:///D:/bld/bld/rattler-build_scikit-learn_1790072988/work/dist/scikit_learn-1.9.1-cp311-cp311-win_amd64.whl#sha256=2dd5aa870d3a244148532514224d52da9875c03114898121eebf2e01a3ed6a99
+scipy @ file:///D:/bld/scipy-split_1779874050212/work/dist/scipy-1.17.1-cp311-cp311-win_amd64.whl#sha256=b7303dbff91581447e6473882e935d15f4f6d8c7afaae2f47a2d49e9c3940ea1
+sentence-transformers==6.2.0
+shellingham==1.5.4
+shiboken6==6.11.3
+sympy==1.14.0
+threadpoolctl @ file:///home/conda/feedstock_root/build_artifacts/threadpoolctl_1789547442801/work
+tokenizers==0.23.3
+torch==2.15.0
+tornado @ file:///D:/bld/tornado_1789910999552/work
+tqdm==4.70.1
+transformers==5.22.1
+truststore==0.10.5
+typer==0.27.3
+typing_extensions==4.16.0
+tzdata @ file:///home/conda/feedstock_root/build_artifacts/bld/rattler-build_python-tzdata_h5ded981_1793205938/work
+umap-learn==0.5.12
+unicodedata2 @ file:///D:/bld/unicodedata2_1789928036032/work
+urllib3 @ file:///home/conda/feedstock_root/build_artifacts/urllib3_1789566614899/work
+win_inet_pton @ file:///D:/bld/win_inet_pton_1733130564612/work
