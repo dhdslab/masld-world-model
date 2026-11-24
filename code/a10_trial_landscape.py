@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import argparse
 import json
 import re
-import sys
 import time
+from pathlib import Path
 from xml.etree import ElementTree as ET
 
 import numpy as np
@@ -256,7 +257,29 @@ def to_date(s):
     return pd.to_datetime(s, errors="coerce")
 
 
-def main(refresh=False):
+def physician_stage_agreement(sample, review_path):
+    from sklearn.metrics import cohen_kappa_score
+
+    review = pd.read_csv(review_path, usecols=["nct_id", "verified_stage"], dtype=str)
+    if review.empty or review.nct_id.duplicated().any() or set(review.nct_id) != set(sample.nct_id):
+        raise ValueError("Physician ratings must contain one row for each sampled NCT ID.")
+    review["verified_stage"] = review.verified_stage.str.strip()
+    if not review.verified_stage.isin(STAGES).all():
+        raise ValueError("Each physician rating must use one of the seven disease-stage categories.")
+    paired = sample[["nct_id", "stage"]].merge(review, on="nct_id", validate="one_to_one")
+    rule_advanced = paired.stage.isin(STAGES[2:6])
+    physician_advanced = paired.verified_stage.isin(STAGES[2:6])
+    return {
+        "n": int(len(paired)),
+        "stage_exact": float((paired.stage == paired.verified_stage).mean()),
+        "stage_kappa": float(cohen_kappa_score(paired.stage, paired.verified_stage)),
+        "advanced_vs_not_agreement": float((rule_advanced == physician_advanced).mean()),
+        "advanced_vs_not_kappa": float(cohen_kappa_score(rule_advanced, physician_advanced)),
+        "confusion_stage": pd.crosstab(paired.stage, paired.verified_stage).to_dict(),
+    }
+
+
+def main(refresh=False, physician_review=None):
     reg = registry(refresh)
     D = pd.DataFrame(reg["records"])
     cutoff = pd.to_datetime(reg["retrieved_utc"][:10])
@@ -338,7 +361,7 @@ def main(refresh=False):
             if "Clinical Trial Protocol" in mm["pub_types"] or PROTO.search(mm["title"]):
                 continue
             d = pd.to_datetime(mm["date"], errors="coerce")
-            if pd.notna(d) and d >= r.pc_date - pd.Timedelta(days=31):
+            if pd.notna(d) and r.pc_date - pd.Timedelta(days=31) <= d <= cutoff:
                 ds.append(d)
         first_pub.append(min(ds) if ds else pd.NaT); n_links.append(len(ds))
     C["first_pub"] = first_pub
@@ -433,9 +456,14 @@ def main(refresh=False):
             samp.append(g.sample(k, random_state=int(rng.integers(1e9))))
         S = pd.concat(samp).head(200)
         frozen.write_text("\n".join(S.nct_id), encoding="utf-8")
-    S[["nct_id", "title", "conditions", "phases", "stage", "endpoint"]].assign(
-        eligibility=S.eligibility.str.slice(0, 3000), primary_outcomes=S.primary_outcomes.apply(lambda x: " | ".join(x)[:1500]),
-        verified_stage="", verified_endpoint="", reviewer_note="").to_csv(vdir / "registry_stage_verification_sample.csv", index=False)
+    template = vdir / "registry_stage_verification_sample.csv"
+    if physician_review is not None:
+        out["physician_stage_agreement"] = physician_stage_agreement(S, physician_review)
+    if physician_review is None or template.resolve() != physician_review.resolve():
+        S[["nct_id", "title", "conditions", "phases", "stage", "endpoint"]].assign(
+            eligibility=S.eligibility.str.slice(0, 3000),
+            primary_outcomes=S.primary_outcomes.apply(lambda x: " | ".join(x)[:1500]),
+            verified_stage="", verified_endpoint="", reviewer_note="").to_csv(template, index=False)
     out["verification_sample_n"] = int(len(S))
     ai = vdir / "ai_registry_reading" / "registry_stage_ai_reading.csv"
     if ai.exists():
@@ -459,4 +487,8 @@ def main(refresh=False):
 
 
 if __name__ == "__main__":
-    main(refresh="--refresh" in sys.argv)
+    parser = argparse.ArgumentParser(description="Analyse ClinicalTrials.gov registrations and results publications.")
+    parser.add_argument("--refresh", action="store_true", help="Refresh the registry and PubMed caches.")
+    parser.add_argument("--physician-review", type=Path, help="CSV containing independent physician stage ratings.")
+    args = parser.parse_args()
+    main(refresh=args.refresh, physician_review=args.physician_review)

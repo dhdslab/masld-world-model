@@ -8,8 +8,9 @@
 Options
   --list                          print the steps of the chosen stage(s) and exit
   --from SCRIPT                   resume at the first step that runs SCRIPT (earlier outputs must exist)
-  --encoder-python PATH           interpreter with PyTorch and transformers for the encoder steps (w0, w2);
-                                  default: the interpreter running this script
+  --encoder-python PATH           interpreter for encoder steps (w0, w2)
+  --upstream-python PATH          interpreter for corpus and topic steps
+                                  both default to the interpreter running this script
   --refresh-world-model-corpus    re-download the PubMed/PubTator3 corpus of the world model (w1) even if it exists
   --refresh-registries            re-query ClinicalTrials.gov and PubMed for the trial landscape (a10)
 
@@ -82,6 +83,7 @@ def main():
     ap.add_argument("--list", action="store_true")
     ap.add_argument("--from", dest="start", default="")
     ap.add_argument("--encoder-python", default=sys.executable)
+    ap.add_argument("--upstream-python", default=sys.executable)
     ap.add_argument("--refresh-world-model-corpus", action="store_true")
     ap.add_argument("--refresh-registries", action="store_true")
     a = ap.parse_args()
@@ -106,7 +108,12 @@ def main():
             continue
         print(f"== {label}", flush=True)
         t = time.time()
-        r = subprocess.run([a.encoder_python if enc else sys.executable, script, *args], cwd=REPO / folder, env=env)
+        python = {
+            "corpus": a.upstream_python,
+            "topics": a.upstream_python,
+            "study": a.encoder_python if enc else sys.executable,
+        }[stage]
+        r = subprocess.run([python, script, *args], cwd=REPO / folder, env=env)
         if r.returncode != 0:
             sys.exit(f"Failed: {label} (exit code {r.returncode})")
         print(f"   done in {(time.time() - t) / 60:.1f} min", flush=True)

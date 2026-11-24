@@ -72,7 +72,7 @@ def ed1(R):
         ax.legend([plt.Rectangle((0, 0), 1, 1, fc=INK, ec=INK), plt.Rectangle((0, 0), 1, 1, fc="white", ec=INK, lw=0.8)],
                   ["Encoder, masked nodes", "Mean of each input"], loc="upper right", fontsize=FS_ANN, handlelength=1.0,
                   frameon=False)
-    save(fig, "SupplementaryFig2")
+    save(fig, "ExtendedDataFig2")
 
 
 def main():

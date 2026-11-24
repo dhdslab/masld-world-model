@@ -116,7 +116,7 @@ def main():
                 clip_on=False)
         for m in (0, 12, 24, 36, 48, 60):
             ax.text(m / 60, yy, f"{nr[str(m)]}", transform=ax.transAxes, ha="center", va="center", fontsize=FS_ANN, color=INK)
-    save(fig, "SupplementaryFig6")
+    save(fig, "ExtendedDataFig6")
 
 
 if __name__ == "__main__":
