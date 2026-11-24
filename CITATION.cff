@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper (reference to be added on publication) and this repository."
+title: "masld-world-model: code for 'Mapping the Future of Metabolic Dysfunction-associated Steatotic Liver Disease'"
+type: software
+authors:
+  - name: "Digital Health Data Science Lab, Korea University College of Medicine"
+repository-code: "https://github.com/dhdslab/masld-world-model"
+license: MIT
+version: "1.0.0"
+keywords:
+  - steatotic liver disease
+  - MASLD
+  - world model
+  - link prediction
+  - forecasting
+  - PubMed
+  - PubTator3
+  - research priorities
