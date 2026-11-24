@@ -17,7 +17,7 @@ FILES = {
     "Figure5": ["wm_subgroups_biomedbert.csv"],
     "Figure6": ["topk_precision_intervals.csv", "fwm_grid.csv", "fwm_primary_metrics.csv", "fwm_contributions.csv",
                 "fwm_dynamics.csv", "fwm_attention_forecast.csv", "fwm_exact_metrics.csv"],
-    "SupplementaryFigures": ["fig1_design_numbers.csv",
+    "ExtendedDataFigures": ["fig1_design_numbers.csv",
                      "wm_papers_by_year.csv", "fwm_graphs_by_year.csv", "wm_task_sizes.csv", "fwm_encoder_reconstruction.csv",
                      "fig2_summary.csv", "nomenclature_map_points.csv", "ed3c_probe_folds.csv", "ed3d_topic_current_share.csv",
                      "wm_ablations_biomedbert.csv", "wm_ablation_intervals.csv", "wm_calibration_biomedbert.csv",
@@ -31,9 +31,9 @@ FILES = {
 
 SHEET = {"fig3a_map_points.csv": "fig2c_umap_points", "ed3_dendrogram_leaves.csv": "fig2b_dendrogram_leaves",
          "ed3_ward_linkage.csv": "fig2b_ward_linkage", "ed3_domains.csv": "fig2_domains", "ed3_topics_shown.csv": "fig2e_topics_shown",
-         "fig3_atlas_ring_summary.csv": "fig3a_ring_summary", "fig2_summary.csv": "sfig3_renaming_summary",
-         "fig1_design_numbers.csv": "sfig1_design_numbers", "ed3c_probe_folds.csv": "sfig3c_probe_folds",
-         "ed3d_topic_current_share.csv": "sfig3d_topic_current_share", "topk_precision_intervals.csv": "topk_precision_ci",
+         "fig3_atlas_ring_summary.csv": "fig3a_ring_summary", "fig2_summary.csv": "ed3_renaming_summary",
+         "fig1_design_numbers.csv": "ed1_design_numbers", "ed3c_probe_folds.csv": "ed3c_probe_folds",
+         "ed3d_topic_current_share.csv": "ed3d_topic_current_share", "topk_precision_intervals.csv": "topk_precision_ci",
          "architecture_dimensions.csv": "architecture_dimensions"}
 
 

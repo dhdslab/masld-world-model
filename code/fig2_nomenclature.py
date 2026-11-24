@@ -90,7 +90,7 @@ def main():
                                                                  "drift_2023_vs_2025_legacy_only", "drift_2023_vs_2025_current_only",
                                                                  "nmi_topic_era", "name_segregated_topics", "topics_evaluated"]]
                  ).to_csv(SRC / "fig2_summary.csv", index=False)
-    save(fig, "SupplementaryFig3")
+    save(fig, "ExtendedDataFig3")
 
 
 if __name__ == "__main__":

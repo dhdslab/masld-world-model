@@ -269,7 +269,7 @@ def main():
     from common import SRC
     R = load_results()
     d = build(R)
-    export(d, "SupplementaryFig1", page="Supplementary Fig. 1")
+    export(d, "ExtendedDataFig1", page="Extended Data Fig. 1")
     W, ST = R["world_model"], R["structure"]
     C = W["corpus"]
     cut = sorted({g["cutoff"] for g in W["grid"]})

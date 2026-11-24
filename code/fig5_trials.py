@@ -136,7 +136,7 @@ def main():
             ("advanced_staged_n", R["advanced_staged_n"])] + [(f"advanced_staged_{k}", v) for k, v in st.items()]
     pd.DataFrame(rows, columns=["quantity", "value"]).to_csv(SRC / "fig5_summary.csv", index=False)
     trim(fig, [(124, 4), (60, 7)])
-    save(fig, "Figure6")
+    save(fig, "trial_landscape_overview")
 
 
 if __name__ == "__main__":

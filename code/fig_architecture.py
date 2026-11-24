@@ -370,7 +370,7 @@ def main():
     e = Shifted()
     e.dy = -87.5
     extension(e, R)
-    export(e, "SupplementaryFig5", W_MM, 40.0, page="Supplementary Fig. 5")
+    export(e, "ExtendedDataFig5", W_MM, 40.0, page="Extended Data Fig. 5")
     D_EMB, K_WHITE, K_Z, n_x, n_tp = _dims()
     dims = [b.stop - b.start for b in F6.BLOCKS.values()]
     pd.DataFrame([("emb", D_EMB), ("whitening", K_WHITE), ("z_extension_embedding", F6.D_Z),

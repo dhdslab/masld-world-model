@@ -119,7 +119,7 @@ We described a forecast model as outperforming a comparator when the 95% interva
 
 **A8 (18 November 2026, after all outcomes had been computed). Implementation corrections, deviations from the plan and additional analyses.**
 
-- **Implementation.** The PubTator3 plain-text export used the variant labels “SNP”, “DNAMutation” and “ProteinMutation”. The parser did not recognise them, so the earlier analysis contained no variants. The corrected parser includes these labels and indexes variants by dbSNP identifier, by HGVS and gene if a dbSNP identifier is unavailable, and by the tmVar normalised form and gene if neither is available. The concordance calculation now uses all positive pairs, replacing the first 4,001 in key order. We also changed the combined logistic comparator (resource allocation and semantic similarity) to balanced class weights, as in A3. With inverse sampling weights, it had performed worse than one of its predictors alone. We recomputed every result.
+- **Implementation.** The PubTator3 plain-text export used the variant labels “SNP”, “DNAMutation” and “ProteinMutation”. The parser did not recognise them, so the earlier analysis contained no variants. The corrected parser includes these labels and indexes variants by dbSNP identifier, by HGVS and gene if a dbSNP identifier is unavailable, and by the tmVar normalised form and gene if neither is available. We recalculated time-to-report concordance using all positive pairs. The earlier calculation used the first 4,001 in key order. We also changed the combined logistic comparator (resource allocation and semantic similarity) to balanced class weights, as in A3. With inverse sampling weights, it had performed worse than one of its predictors alone. We recomputed every result.
 - **Deviations present in the initial implementation.** The code evaluated an additional test task (T = 2024, Δ = 1). We report it separately and use the 11 tasks from section 3 for summaries across tasks. The advanced-liver-disease set contained no liver-transplantation identifier because PubTator3 does not annotate the procedure as a disease.
 - **Timing of A3 and A4.** Both changes followed evaluation on 64,051 of the final 82,084 papers. In that subset, the original neural model achieved an AUROC of 0.36 for Δ = 1. At the primary horizon, its AUROC was 0.957 versus 0.967 for the hazard model. Intercept recalibration preserves the ranking. Changing the training weights can change it.
 - **Additional secondary analyses.** These were added after the original plan and used a separate random-number generator (seed + 8) to preserve the earlier draws:
@@ -133,7 +133,7 @@ We described a forecast model as outperforming a comparator when the 95% interva
   - Cutoff-specific versions of the shared-name exclusion (A6) and the MASLD-family exclusion.
   - Tests of the model’s ability to predict its own state. For the semantic state, we compared the projection in equation (10) with persistence. For research attention, we compared a Poisson transition estimated at earlier cutoffs with persistence of recent activity.
   - Calibration slope and exact Poisson intervals for observed rates.
-- We renamed the “near-prospective” task the “most recent temporal hold-out” because the outcomes already existed when we scored the task.
+- We renamed the “near-prospective” task the “most recent temporal hold-out” because the outcomes were available when we scored the task.
 - The original plan is archived as World_Model_Analysis_Plan_v1.0.md.
 
 **A9 (18 November 2026, after all A8 outcomes had been computed). Measurement corrections.**
@@ -142,7 +142,7 @@ PubTator3 assigned the mention “fat” mainly to a disease identifier through 
 
 We applied three rules in all years and analyses using annotation and text information without reference to individual pair outcomes:
 
-1. We removed annotations within the full names for NAFLD, NASH, MAFLD, MASLD, MASH and MetALD, and within “steatotic liver disease”. The encoder already used neutralised disease names. This correction applied the corresponding rule to the entity graph.
+1. We removed annotations within the full names for NAFLD, NASH, MAFLD, MASLD, MASH and MetALD, and within “steatotic liver disease”. This correction applied the encoder’s name-neutralisation rule to the entity graph.
 2. We merged identifiers whose most frequent mentions were identical after normalisation. This extended A6 from pair exclusions to the entity definitions. The species-specific analysis from the original plan retained one entity per identifier.
 3. We defined an entity’s annotation rate as the number of papers in which PubTator3 annotated it divided by the number of papers containing its most frequent mention. We excluded entities whose rate changed by a factor of 3 or more between adjacent years if both years had at least 20 papers containing the mention and at least one year had 20 or more annotated papers. We treated such jumps as changes in annotation.
 
@@ -171,7 +171,7 @@ The new model was implemented in code/w6_foundation_world_model.py and was desig
 
 The primary contrast compared the new model with resource allocation on the primary task (2022, Δ = 3). Secondary comparisons included the history-only head, the head with embeddings but without dynamics or forecasts, and the original hazard world model refitted on the same training tasks. We ablated each feature block (language, attention, graph context, rollout and TimesFM) and reran the pipeline with a random encoder. We compared attention forecasts with the last observation and with TimesFM alone using mean absolute error. For the latent dynamics, we used three references: the last observation carried forward, TimesFM applied to each latent dimension, and rollouts using observed activity. Secondary evaluations covered the full task grid, all candidate pairs and the most recent hold-out. We used node-bootstrap intervals with a separate generator (seed + 10).
 
-We first checked the implementation on one development task with cutoff 2016 and Δ = 3, using training cutoffs from 2010 through 2013 and labels from 2017–2019. The development run was intended to check the code. Any subsequent changes to settings were restricted to corrections and recorded in this amendment. The authors had already seen the A1–A9 outcomes for the same tasks when the new model was specified. All retrospective comparisons of the new model were therefore exploratory.
+The development run used cutoff 2016 and Δ = 3, training cutoffs from 2010 through 2013 and outcome years 2017–2019. The authors specified the new model after reviewing the A1–A9 outcomes for the same tasks, so the retrospective comparisons were exploratory. The changes made after the development run are listed below.
 
 **Corrections after the development run (18 November 2026, 05:45 UTC, before any test task was run).**
 
@@ -185,7 +185,7 @@ The other settings were retained. The development AUROCs for link forecasting (0
 
 **A11 (18 November 2026, about 08:00 UTC, after all A10 outcomes were available).**
 
-We added the following exploratory analyses, each with its own random-number generator to preserve the draws used in earlier results:
+The additional analyses used separate random-number generators to preserve the earlier draws.
 
 1. Refit the neural hazard model specified in version 1.0 on each test task and calculate paired intervals for AUROC and popularity-adjusted AUROC.
 2. Calculate paired intervals for popularity-adjusted AUROC against resource allocation and the history-only head on each task.
@@ -200,18 +200,20 @@ At the authors’ request, we restored the neural model specified in version 1.0
 
 The world model had the highest point estimates for AUROC and popularity-adjusted AUROC on the primary task. The two values were 0.976 and 0.923 in the reported A9 run and 0.976 and 0.924 when refitted in the A10–A11 comparison. The corresponding values for the foundation-model extension were 0.973 and 0.914. The comparison with boosted trees using all of the world model’s features did not establish an AUROC difference. The linear form of the world model had a slightly higher point estimate for precision among its 1,000 highest-ranked pairs.
 
-The main results came from the A9 run. The paired comparison with the refitted world model and the results for the foundation-model extension came from the A10–A11 run. This amendment changed the designation of the primary model, with no refitting, setting changes or new outcome calculations. The designation was made after comparing the results, so the retrospective comparisons remained exploratory.
+The paper uses A9 for the primary results and A10–A11 for the paired comparison. The primary model was designated after the comparison, without further fitting or calculation of outcomes. This timing makes the retrospective comparisons exploratory.
 
 **A12 addendum (19 November 2026, after all outcomes were available). Descriptive semantic atlas.**
 
-At the authors’ request, we added a descriptive figure showing how the world-model state was organised by research domain, presented in the final paper as Fig. 3.
+The addendum introduced the semantic atlas of research domains (Fig. 3).
 
 We linked the entities in the 2022 graph to the companion topic model via PubMed identifiers. The topic model used disease-name-neutralised PubMedBERT representations of papers published from 2020 through June 2026 and identified 91 topics across 10 domains. We assigned each entity with at least three linked papers through 2022 to the domain with the largest Pearson residual for its linked papers. We first tried assignment by the most frequent domain, which placed most genes and chemicals in the largest domain (experimental research). We chose the Pearson residual rule after seeing that distribution.
 
 We report standardised summaries of the entity state by domain. For the primary task, we report the AUROC of each pair feature evaluated alone and of the world model, both across all candidate pairs and for pairs involving each domain. We refitted the world model using the training tasks and random-number generator from the comparison run and reproduced that run’s AUROC.
 
-The model, its settings and the comparisons were unchanged. The code is in code/w10_semantic_atlas.py and code/fig_atlas.py.
+See `code/w10_semantic_atlas.py` and `code/fig_atlas.py` for the atlas.
 
 - **19 November 2026, later the same day.** At the authors’ request, the study design moved to Fig. 1, the architecture to Extended Data Fig. 1 and the semantic atlas to Fig. 2. These were figure changes only.
 - **21 November 2026.** Fig. 1 was assigned to the world model’s temporal design and architecture, Fig. 2 to the research topics and domains, and Fig. 3 to the semantic atlas. The study design moved to Extended Data Fig. 1 and the foundation-model extension architecture to Extended Data Fig. 5. These were figure changes only.
-- **22 November 2026.** Extended Data Figs. 1–6 became Supplementary Figs. 1–6. Extended Data Tables 1 and 2 became Supplementary Tables 1a and 3. Supplementary Information 1 contains the supplementary figures and tables. Supplementary Information 2 contains the notes, renumbered by first citation. The analysis plan appears as Supplementary Note 1.
+- **22 November 2026.** A draft labelled the six supporting figures Supplementary Figs. 1–6 and renumbered the former Extended Data Tables 1 and 2 as Supplementary Tables 1a and 3. The notes were in a separate file.
+
+The manuscript cites the supporting figures as Extended Data Figs. 1–6. Supplementary Information combines Tables 1–7 and Notes 1–5.

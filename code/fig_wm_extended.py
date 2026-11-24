@@ -67,7 +67,7 @@ def ed5(R):
     ax.set_xlabel("Standardized log-hazard coefficient")
     ax.set_title("World model (hazard)", loc="left")
     panel(ax, "d")
-    save(fig, "ExtendedDataFig3")
+    save(fig, "world_model_corpus_diagnostics")
 
 
 def _ci_row(ax, v, c, y, col, s=9):
@@ -154,7 +154,7 @@ def ed6(R):
     ax.set_ylim(0, 1); ax.set_yticks([0, 0.5, 1]); ax.set_yticklabels(["0", "0.5", "1"])
     ax.set_ylabel("Spearman correlation with\nnew papers, 2023–2025")
     ax.set_title("Attention", loc="left")
-    save(fig, "SupplementaryFig4")
+    save(fig, "world_model_robustness_summary")
 
 
 def ed4(R):
@@ -277,7 +277,7 @@ def ed4(R):
     ax.set_xticks([0, 1]); ax.set_xticklabels(["Persistence", "Transition\nmodel"])
     ax.set_ylim(0, 1); ax.set_yticks([0, 0.5, 1]); ax.set_yticklabels(["0", "0.5", "1"])
     ax.set_ylabel("Attention: Spearman correlation\nwith new papers, 2023–2025")
-    save(fig, "SupplementaryFig4")
+    save(fig, "ExtendedDataFig4")
 
 
 def main():

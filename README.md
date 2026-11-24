@@ -2,20 +2,13 @@
 
 Analysis code for *Mapping the Future of Metabolic Dysfunction-associated Steatotic Liver Disease*.
 
-The model forecasts which pairs of biomedical entities will first be reported together in the MASLD literature. At each
-publication cutoff, a frozen PubMedBERT encoder represents genes, chemicals, diseases and variants. The model combines
-these representations and their changes over time with publication counts and the co-mention graph. A discrete-time
-hazard model estimates how likely a pair is to be reported together after the cutoff.
+The world model ranks gene, chemical, disease and variant pairs by the likelihood of a future co-mention in the
+MASLD literature. Candidate pairs had never appeared together in a sentence by the cutoff. The outcome was a
+sentence co-mention in at least two distinct papers during the evaluation window.
 
-Eligible pairs had never appeared together in a sentence through the cutoff. A pair counts as a new association if it
-appears together in a sentence in at least two distinct papers during the evaluation window. We used temporal hold-outs
-and compared the world model with an extension adapted from three foundation-model designs. See [Data](#data) for the
-inputs needed to reproduce the analyses.
-
-![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
-![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
-
----
+The primary evaluation used the state at the end of 2022 to rank pairs reported in 2023–2025. The model uses
+frozen PubMedBERT embeddings, publication counts and the co-mention graph in a discrete-time hazard model.
+A separate comparison evaluated an extension adapted from three foundation-model designs.
 
 ## Repository layout
 
@@ -23,13 +16,11 @@ inputs needed to reproduce the analyses.
 |---|---|
 | `upstream/corpus/` | Stage 1. Retrieves and screens the companion corpus (PubMed, Europe PMC, OpenAlex, 2020 to June 2026) and the trial, grant, news and drug-label records (`01`–`08`). |
 | `upstream/topics/` | Stage 2. Sentence embeddings of the companion corpus, topic models (PCA, UMAP, HDBSCAN), research domains, a study-design classifier and topic dynamics (`ku01`–`ku06`). |
-| `code/` | Stage 3, the study. It builds the world-model corpus (PubMed and PubTator3, 2000 to June 2026), encoders and embeddings (`w0`–`w2`) and the world model and its evaluation (`w3`). It also covers the foundation-model extension (`w6`), the semantic atlas (`w10`) and the run history (`w4`), as well as the corpus and renaming analyses (`a1`, `a2`), the trial landscape (`a10`), the figures (`fig*`) and Source Data (`build_source_data.py`). |
+| `code/` | Stage 3. Forecasting corpus and embeddings (`w0`–`w2`), primary evaluation (`w3`), foundation-model comparison (`w6`), semantic atlas (`w10`), trial analysis (`a10`), figure scripts and Source Data. See [the results map](docs/RESULTS_MAP.md) for individual outputs. |
 | `protocol/` | Version 1.0 of the analysis plan and the dated amendments A1–A12, described in Supplementary Note 1. |
 | `demo/` | A synthetic-data demo of the model and its evaluation. |
-| `docs/RESULTS_MAP.md` | Where each figure, table and note of the paper comes from. |
+| `docs/RESULTS_MAP.md` | Scripts and outputs for each figure, table and note. |
 | `run_pipeline.py` | Runs the three stages in order. |
-
----
 
 ## System requirements
 
@@ -41,7 +32,7 @@ inputs needed to reproduce the analyses.
   encoder step `w2`. The world model (`w3`) and the extension (`w6`) run on the CPU. Smaller memory has not been tested.
 - Upstream pipelines: a Windows workstation, CPU only, with 32 cores and 128 GB RAM.
 
-**Software.** Three Python environments were used. Their versions are pinned in the files below.
+The reported runs used three Python environments.
 
 | Environment | Used for | Python | Key packages | File |
 |---|---|---|---|---|
@@ -58,8 +49,6 @@ inputs needed to reproduce the analyses.
 - Retrieval steps need internet access. `upstream/corpus/03_openalex.py` needs an OpenAlex API key in the environment
   variable `OPENALEX_API_KEY`.
 
----
-
 ## Installation
 
 ```bash
@@ -71,21 +60,18 @@ conda create -n masld python=3.12.7 -y && conda activate masld
 pip install -r requirements.txt
 
 # encoder environment (for w0 and w2)
-conda create -n masld-encoder python=3.9 -y && conda activate masld-encoder
+conda create -n masld-encoder python=3.9.21 -y && conda activate masld-encoder
 pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu126
 pip install -r requirements-encoder.txt
 
 # upstream environment (stages 1 and 2)
-conda create -n masld-upstream python=3.11 -y && conda activate masld-upstream
+conda create -n masld-upstream python=3.11.18 -y && conda activate masld-upstream
 pip install -r upstream/requirements.txt
 ```
 
-Each environment typically installs in a few minutes, most of which are spent downloading PyTorch. The scripts
-download model weights from Hugging Face on first use. The encoder scripts (`code/w0_download_encoders.py` and
+The scripts download model weights from Hugging Face on first use. The encoder scripts (`code/w0_download_encoders.py` and
 `upstream/topics/ku01_embed.py`) specify model revisions. The foundation-model extension (`w6`) downloads the
 available revision of TimesFM 2.5 (`google/timesfm-2.5-200m-pytorch`).
-
----
 
 ## Demo
 
@@ -99,7 +85,7 @@ conda activate masld
 python demo/demo_synthetic.py
 ```
 
-Expected output, which took about 15 s on the computer described above:
+Example output from the synthetic demo
 
 ```text
 Synthetic field: 600 entities, 7,357 reported associations at the test cutoff, 172,343 candidate pairs, 2,679 new associations within 3 years (training cutoff: 2,272).
@@ -126,16 +112,13 @@ Standardized coefficients of the mathematical world model (per standard deviatio
 Finished in 12 s; results written to demo/output/demo_results.json
 ```
 
-The demo writes `demo/output/demo_results.json`. In the example run, both world models had higher AUROCs than
-resource allocation, and both paired intervals excluded zero. Values can differ slightly across platforms.
-
----
+Demo results can vary slightly across platforms.
 
 ## Instructions for use
 
 ### Folders
 
-Outputs are written to three folders, which are set with environment variables:
+Use these environment variables to set the output paths.
 
 | Variable | Default | Contents |
 |---|---|---|
@@ -148,20 +131,22 @@ All of these folders are excluded from version control.
 ### Running the pipeline
 
 ```bash
-python run_pipeline.py corpus                       # stage 1 (network-bound; GDELT news retrieval can take many hours)
-python run_pipeline.py topics                       # stage 2
+conda activate masld-upstream
+python run_pipeline.py corpus
+python run_pipeline.py topics
+
+conda activate masld
 python run_pipeline.py study --encoder-python /path/to/masld-encoder/python
-python run_pipeline.py study --list                 # show the steps without running them
-python run_pipeline.py study --from w6_foundation_world_model.py   # resume
 ```
 
-Each stage runs its scripts in order, each in its own process, and stops at the first failure.
+Use `study --list` to show the steps. Resume with `study --from w6_foundation_world_model.py` and
+the same `--encoder-python` option. Stages stop at the first failed command. To run both upstream
+stages and the study in one command, pass `--upstream-python` and `--encoder-python` to `all`.
 
-- **Cached downloads.** The world-model corpus (`w1`), the encoders (`w0`) and the embeddings (`w2`) are skipped if
-  they already exist. Use `--refresh-world-model-corpus` to download the corpus again. `a10` re-queries
-  ClinicalTrials.gov and PubMed only with `--refresh-registries`.
-- **Running one script.** Scripts can also be run one at a time from their folder, for example
-  `cd code && python w3_world_model.py --encoder biomedbert`.
+The runner reuses downloaded corpora, model weights and embeddings at their expected paths. To
+rebuild the corpus and derived arrays together, start with a fresh `MASLD_OUTPUT_DIR` and retain the
+original output folder if it contains a reported run. The trial script reuses its ClinicalTrials.gov
+and PubMed caches where available. Use `--refresh-registries` to refresh both.
 
 Run times of the longest steps of stage 3 on the computer described above:
 
@@ -171,17 +156,15 @@ Run times of the longest steps of stage 3 on the computer described above:
 | `w6_foundation_world_model.py` | about 1.5 hours on 12 threads |
 | `w2_worldmodel_embed.py` | about 3 minutes per encoder on the GPU |
 
-Every other step takes minutes. `w1` and stage 1 are limited by the rate limits of the public services they query.
+Retrieval times depend on the public services and their rate limits.
 
 ### Outputs
 
 - `analysis/results.json` contains the numerical analysis results.
-- `figures/` contains the figures in vector PDF, SVG and 600 dpi PNG.
-- `source_data/` and `source_data_xlsx/` contain the plotted values.
+- `figures/` contains `Figure1`–`Figure6` and `ExtendedDataFig1`–`ExtendedDataFig6` as PDF, SVG and 600 dpi PNG.
+- `source_data/` holds plotted values. The workbook for Extended Data Figs. 1–6 is `source_data_xlsx/SourceData_ExtendedDataFigures.xlsx`.
 
 [`docs/RESULTS_MAP.md`](docs/RESULTS_MAP.md) links the paper's figures, tables and notes to their scripts and outputs.
-
----
 
 ## Data
 
@@ -199,39 +182,53 @@ The pipeline retrieves public records and downloads model weights from the sourc
 
 Titles and abstracts are subject to the copyright of their publishers and are not redistributed.
 
-**Derived data.** The pipeline generates the world-model entity tables, states, candidate pairs, scores and run history.
+### Data snapshots
 
-**Physician review of trial registrations.** A physician independently classified the disease stage and primary endpoint
-for a stratified sample of trial registrations. The agreement analysis in `code/a10_trial_landscape.py` computes
-Cohen’s κ by comparing the physician’s assessments with the rule-based classifications.
+The reported world-model corpus was retrieved on 17 November 2026 and the trial records on 12 November 2026.
+The PubMed search used publication-year windows and subdivided windows that met the search limit.
+The repository contains the retrieval and analysis scripts. Reproducing the reported numbers also requires
+the original source snapshots and cached inputs because the public databases change over time.
 
-**Exact reproduction.** PubMed, PubTator3 and the other sources change over time, so a new download may differ from the
-study corpus. Exact reproduction requires the records used for the reported analyses. The world-model corpus was
-retrieved on 17 November 2026 and the trial records on 12 November 2026.
+### Clinical trial publication and physician review
 
----
+The publication analysis includes MASLD-targeted trials recorded as completed or terminated. Their actual
+primary completion date had to be on or after 1 January 2010 and at least 365 days before registry retrieval.
+Follow-up ended at retrieval. PubMed links identify results papers.
 
-## Analysis plan
+A physician independently rated the disease stage of 200 sampled registrations. To recompute the reported
+agreement, use the original registry snapshot, the original sample IDs in
+`validation/registry_stage_verification_ids.txt` and the original physician ratings in a CSV with
+`nct_id` and `verified_stage` columns. Run:
 
-Version 1.0 of the analysis plan specified the primary task, model and metric before any forecasting outcome was
-computed. The 12 dated amendments in `protocol/` record subsequent changes and indicate which decisions were made after
-reviewing results. Supplementary Note 1 describes the plan and its amendments.
+```bash
+python code/a10_trial_landscape.py --physician-review /path/to/physician_ratings.csv
+```
 
-The pipeline logs analysis runs, including development and superseded runs, to `logs/pipeline_log.jsonl`.
-`code/w4_run_history.py` compiles the run history for Supplementary Table 2.
+The script writes Cohen’s κ for exact stage and for advanced versus other stages to
+`trial_landscape.physician_stage_agreement` in `analysis/results.json`. Supply one rating from the seven
+study categories for each sampled NCT ID. The original review files are not distributed here.
 
----
+### Forecast evaluation
 
-## Reproducibility notes
+Graph states and training labels are restricted by cutoff. The reported pipeline merges entities with the
+same name, identifies corpus-defining diseases and screens for abrupt changes in annotation rates using
+the full corpus before it constructs those states. Supplementary Note 2 reports cutoff-specific
+comparisons for the same-name and corpus-defining disease rules.
 
-- **Random seeds** are fixed:
-  - `SEED = 20261108` in `code/common.py`;
-  - `WM_SEED = 20261117` in `code/w3_world_model.py` (separate generators are derived from it for later amendments);
-  - `SEED = 2026` in `upstream/topics/ku_common.py`.
-- **Embeddings** are stored as float16. Results computed on other GPUs or on the CPU may differ in the last digit.
-- **Run record.** `results.json` records the outputs of every step, with the time each section was written.
-- **Earlier exploratory analyses.** Supplementary Note 5 documents the exploratory work that preceded the reported
-  analyses. This repository covers the analyses reported in the paper.
+## Analysis plan and run records
+
+[Version 1.0 and amendments A1–A12](protocol/World_Model_Analysis_Plan.md) record the original plan and
+subsequent decisions (Supplementary Note 1).
+Supplementary Table 2 uses the historical `logs/pipeline_log.jsonl` file. The script
+`code/w4_run_history.py` can compile logs from a new run, but the historical log is required for the
+published run record. Supplementary Note 5 documents the audit of earlier analyses.
+
+### Seeds and numerical precision
+
+- `code/common.py` uses seed `20261108`.
+- `code/w3_world_model.py` uses seed `20261117` and derives separate generators for the later analyses.
+- `upstream/topics/ku_common.py` uses seed `2026`.
+- Embeddings are stored as float16. Platform differences can affect the last digit of reported metrics.
 
 ## Citation
 
